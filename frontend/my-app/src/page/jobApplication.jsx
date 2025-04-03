@@ -2,6 +2,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import axios from "axios";
+
 import { useParams, useNavigate } from "react-router-dom";
 import { User, Mail, Phone, Calendar, MapPin, DollarSign, Home, Briefcase, ChevronRight } from "lucide-react";
 

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 import { useState, useEffect } from "react"
-import axios from "axios"
+import axios from "axios";
 import Navbar from "../components/Navbar"
 import { Search, Calendar, MapPin, DollarSign, Mail, Phone, User, Clock, Home, Briefcase, ChevronRight } from "lucide-react"
 
