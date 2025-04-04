@@ -52,7 +52,7 @@ const Register = () => {
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden w-full max-w-lg">
                 {/* Header Section */}
                 <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-8 text-center text-white">
-                    <h1 className="text-3xl font-bold mb-2">Create Your Account</h1>
+                    <h1 className="text-3xl font-bold mb-2">Create My Account</h1>
                     <p className="opacity-90">Join our platform to find or post amazing job opportunities</p>
                 </div>
 
