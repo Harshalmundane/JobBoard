@@ -26,6 +26,8 @@ const Login = () => {
         try {
             const response = await axios.post("http://localhost:3001/api/auth/login", user);
             localStorage.setItem("user", JSON.stringify(response.data.user));
+            localStorage.setItem("user", JSON.stringify(response.data.user));
+            localStorage.setItem("token", response.data.token); // ⭐ Add this line
             
             // Redirect to home or previous protected page
             const from = location.state?.from?.pathname || "/";

@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import React, { useState } from "react";
 import axios from "axios";
-
+import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { User, Mail, Lock, Phone, Briefcase, ArrowRight } from "lucide-react";
 
@@ -12,6 +12,7 @@ const Register = () => {
         password: "",
         phone: "",
         role: "Job Seeker",
+        logo: null
     });
 
     const [error, setError] = useState(null);
@@ -22,31 +23,58 @@ const Register = () => {
         setUser({ ...user, [e.target.name]: e.target.value });
     };
 
+    const handleFileChange = (e) => {
+        setUser({ ...user, logo: e.target.files[0] });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
         setIsSubmitting(true);
-
+    
         try {
-            const response = await axios.post("http://localhost:3001/api/auth/register", {
-                username: user.name,
-                email: user.email,
-                password: user.password,
-                phone: user.phone,
-                role: user.role,
-            });
+            const formData = new FormData();
+            formData.append("username", user.name);
+            formData.append("email", user.email);
+            formData.append("phone", user.phone);
+            formData.append("password", user.password);
+            formData.append("role", user.role);
 
+            // Debug: Log FormData contents
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+    
+            if (user.role === "Job Poster" && user.logo) {
+                formData.append("logo", user.logo);
+            }
+    
+            const response = await axios.post(
+                "http://localhost:3001/api/auth/register",
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+    
             if (response.status === 201) {
                 toast.success("Registration successful! Please log in.");
                 navigate("/login");
             }
         } catch (err) {
-            setError(err.response?.data?.message || "Registration failed. Please try again.");
+            console.error("Registration error:", err);
+            const errorMessage = err.response?.data?.message || 
+                              err.response?.data?.error?.message || 
+                              "Registration failed. Please try again.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setIsSubmitting(false);
         }
     };
-
+    
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden w-full max-w-lg">
@@ -127,6 +155,7 @@ const Register = () => {
                                     onChange={handleChange}
                                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     required
+                                    minLength="6"
                                 />
                             </div>
                         </div>
@@ -162,12 +191,32 @@ const Register = () => {
                                     value={user.role}
                                     onChange={handleChange}
                                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white"
+                                    required
                                 >
                                     <option value="Job Seeker">Find a Job</option>
                                     <option value="Job Poster">Post Jobs</option>
                                 </select>
                             </div>
                         </div>
+
+                        {/* Logo Upload (Only for Job Posters) */}
+                        {user.role === "Job Poster" && (
+                            <div className="space-y-1">
+                                <label className="block text-sm font-medium text-gray-700">Upload Company Logo</label>
+                                <div className="relative">
+                                    <input
+                                        type="file"
+                                        name="logo"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                    />
+                                </div>
+                                {user.logo && (
+                                    <p className="text-sm text-gray-500 mt-1">Selected: {user.logo.name}</p>
+                                )}
+                            </div>
+                        )}
 
                         {/* Submit Button */}
                         <div className="pt-2">

@@ -15,9 +15,10 @@ const Navbar = () => {
 
     const handleLogout = () => {
         localStorage.removeItem("user");
-        setUser(null);
-        window.location.reload();
+        localStorage.removeItem("token");
+        window.location.reload(); // Optional: force UI to update
     };
+    
 
     // Close mobile menu when route changes
     useEffect(() => {
@@ -43,16 +44,16 @@ const Navbar = () => {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center space-x-8">
-                        <Link 
-                            to="/" 
+                        <Link
+                            to="/"
                             className={`px-3 py-2 text-sm font-medium ${location.pathname === "/" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-700 hover:text-indigo-500"} transition-colors duration-200`}
                         >
                             Home
                         </Link>
 
                         {user?.role !== "Job Poster" && (
-                            <Link 
-                                to="/jobs" 
+                            <Link
+                                to="/jobs"
                                 className={`px-3 py-2 text-sm font-medium ${location.pathname === "/jobs" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-700 hover:text-indigo-500"} transition-colors duration-200`}
                             >
                                 Browse Jobs
@@ -61,14 +62,14 @@ const Navbar = () => {
 
                         {user?.role === "Job Poster" && (
                             <>
-                                <Link 
-                                    to="/postjob" 
+                                <Link
+                                    to="/postjob"
                                     className={`px-3 py-2 text-sm font-medium ${location.pathname === "/postjob" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-700 hover:text-indigo-500"} transition-colors duration-200`}
                                 >
                                     Post Job
                                 </Link>
-                                <Link 
-                                    to="/application" 
+                                <Link
+                                    to="/application"
                                     className={`px-3 py-2 text-sm font-medium ${location.pathname === "/application" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-700 hover:text-indigo-500"} transition-colors duration-200`}
                                 >
                                     Applications
@@ -78,14 +79,14 @@ const Navbar = () => {
 
                         {!user ? (
                             <div className="flex items-center space-x-4 ml-4">
-                                <Link 
-                                    to="/register" 
+                                <Link
+                                    to="/register"
                                     className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors duration-200"
                                 >
                                     Register
                                 </Link>
-                                <Link 
-                                    to="/login" 
+                                <Link
+                                    to="/login"
                                     className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
                                 >
                                     Login
@@ -93,23 +94,34 @@ const Navbar = () => {
                             </div>
                         ) : (
                             <div className="flex items-center space-x-4 ml-4">
-                            {user && (
-                              <span
-                                className="mr-2 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600 transition-colors duration-200"
-                              >
-                                Hi, {user.username || user.email.split("@")[0]}
-                              </span>
-                            )}
-                          
-                            <button
-                              onClick={handleLogout}
-                              className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition-colors duration-200 shadow-md"
-                            >
-                              Logout
-                            </button>
-                          </div>
-                          
-                          
+                                {user && (
+                                    <div className="flex items-center space-x-3">
+                                        <span className="text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
+                                            Hi, {user.username || user.email.split("@")[0]}
+                                        </span>
+
+                                        {user.role === "Job Poster" && user.logo && (
+                                            <img
+                                                src={`http://localhost:3001/uploads/${user.logo}`}
+                                                alt="User Logo"
+                                                className="h-14 w-14 rounded-full object-contain bg-white p-1 border border-gray-300"
+                                            />
+                                        )}
+                                    </div>
+                                )}
+
+
+
+
+                                <button
+                                    onClick={handleLogout}
+                                    className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition-colors duration-200 shadow-md"
+                                >
+                                    Logout
+                                </button>
+                            </div>
+
+
                         )}
                     </div>
 
@@ -135,16 +147,16 @@ const Navbar = () => {
             {mobileMenuOpen && (
                 <div className="md:hidden bg-white shadow-lg">
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                        <Link 
-                            to="/" 
+                        <Link
+                            to="/"
                             className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === "/" ? "bg-indigo-50 text-indigo-600" : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"} transition-colors duration-200`}
                         >
                             Home
                         </Link>
 
                         {user?.role !== "Job Poster" && (
-                            <Link 
-                                to="/jobs" 
+                            <Link
+                                to="/jobs"
                                 className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === "/jobs" ? "bg-indigo-50 text-indigo-600" : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"} transition-colors duration-200`}
                             >
                                 Browse Jobs
@@ -153,14 +165,14 @@ const Navbar = () => {
 
                         {user?.role === "Job Poster" && (
                             <>
-                                <Link 
-                                    to="/postjob" 
+                                <Link
+                                    to="/postjob"
                                     className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === "/postjob" ? "bg-indigo-50 text-indigo-600" : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"} transition-colors duration-200`}
                                 >
                                     Post Job
                                 </Link>
-                                <Link 
-                                    to="/application" 
+                                <Link
+                                    to="/application"
                                     className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === "/application" ? "bg-indigo-50 text-indigo-600" : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"} transition-colors duration-200`}
                                 >
                                     Applications
@@ -170,14 +182,14 @@ const Navbar = () => {
 
                         {!user ? (
                             <div className="pt-4 pb-2 border-t border-gray-200">
-                                <Link 
-                                    to="/register" 
+                                <Link
+                                    to="/register"
                                     className="block w-full px-4 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600 rounded-md transition-colors duration-200"
                                 >
                                     Register
                                 </Link>
-                                <Link 
-                                    to="/login" 
+                                <Link
+                                    to="/login"
                                     className="block w-full mt-2 px-4 py-2 text-left text-base font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200"
                                 >
                                     Login

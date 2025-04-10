@@ -21,7 +21,7 @@ const Jobs = () => {
             const response = await axios.get("http://localhost:3001/api/jobs");
             setJobs(response.data);
             setFilteredJobs(response.data);
-            
+
             // Extract unique categories
             const uniqueCategories = [...new Set(response.data.map(job => job.category || "General"))];
             setCategories(["All", ...uniqueCategories]);
@@ -60,34 +60,34 @@ const Jobs = () => {
                 <div className="container mx-auto px-6 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold mb-6">Find Your Next Opportunity</h1>
                     <p className="text-xl md:text-2xl mb-8">Browse through our curated list of exciting career opportunities</p>
-                    
+
                     {/* Search Bar */}
-                  {/* Search Bar - Updated Version */}
-<div className="max-w-3xl mx-auto">
-    <div className="relative">
-        <input
-            type="text"
-            placeholder="Search by job title, company, or keywords..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="w-full p-4 pr-12 rounded-lg shadow-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-gray-200"
-        />
-        <svg 
-            className="absolute right-4 top-4 h-6 w-6 text-indigo-600" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24" 
-            xmlns="http://www.w3.org/2000/svg"
-        >
-            <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
-            />
-        </svg>
-    </div>
-</div>
+                    {/* Search Bar - Updated Version */}
+                    <div className="max-w-3xl mx-auto">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search by job title, company, or keywords..."
+                                value={searchTerm}
+                                onChange={handleSearch}
+                                className="w-full p-4 pr-12 rounded-lg shadow-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-gray-200"
+                            />
+                            <svg
+                                className="absolute right-4 top-4 h-6 w-6 text-indigo-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -98,8 +98,8 @@ const Jobs = () => {
                         <button
                             key={category}
                             onClick={() => handleCategoryFilter(category)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === category 
-                                ? 'bg-indigo-600 text-white shadow-md' 
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === category
+                                ? 'bg-indigo-600 text-white shadow-md'
                                 : 'bg-white text-gray-700 hover:bg-gray-100 shadow-sm'}`}
                         >
                             {category}
@@ -127,39 +127,46 @@ const Jobs = () => {
                                 <div key={job._id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
                                     <div className="p-6">
                                         <div className="flex items-start justify-between">
-                                            <div>
-                                                <span className="inline-block px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-50 rounded-full mb-2">
-                                                    {job.category || "General"}
-                                                </span>
-                                                <h2 className="text-xl font-bold text-gray-900">{job.title}</h2>
-                                                <p className="mt-1 text-indigo-600 font-medium">{job.company}</p>
+                                            <div className="w-full">
+                                                <div className="flex items-center gap-3 mb-1">
+                                                {job.user_id?.logo && (
+                        <img
+                            className="h-6 w-6 rounded-full object-contain border border-gray-300 bg-white p-1"
+                            src={`http://localhost:3001/uploads/${job.user_id.logo}`}
+                            alt="Logo"
+                        />
+                    )}
+                                                    <p className="text-indigo-600 font-semibold text-base">{job.company}</p>
+                                                </div>
+                                                <h2 className="text-lg font-bold text-gray-900 mb-1">{job.title}</h2>
+                                                <p className="text-gray-500 text-sm line-clamp-3 mb-3">{job.description}</p>
+
+                                                <div className="flex items-center text-sm text-gray-500 mb-2">
+                                                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    {job.location}
+                                                </div>
+
+                                                <p className="text-gray-700 font-medium mb-3">
+                                                    <span className="text-indigo-600">Salary:</span> ₹{job.salary}
+                                                </p>
+
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full">{job.category || "General"}</span>
+                                                    <Link
+                                                        to={`/apply-job/${job._id}`}
+                                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm transition-all"
+                                                    >
+                                                        Apply Now
+                                                    </Link>
+                                                </div>
                                             </div>
-                                            {job.logo && (
-                                                <img className="h-12 w-12 object-contain" src={job.logo} alt={`${job.company} logo`} />
-                                            )}
-                                        </div>
-                                        
-                                        <div className="mt-4 flex items-center text-gray-500">
-                                            <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                            <span>{job.location}</span>
-                                        </div>
-                                        
-                                        <p className="mt-4 text-gray-600 line-clamp-3">{job.description}</p>
-                                        
-                                        <div className="mt-6 flex items-center justify-between">
-                                            <span className="text-lg font-bold text-gray-900">{job.salary}</span>
-                                            <Link 
-                                                to={`/apply-job/${job._id}`}
-                                                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
-                                            >
-                                                Apply Now
-                                            </Link>
                                         </div>
                                     </div>
                                 </div>
+
                             ))}
                         </div>
                     )}

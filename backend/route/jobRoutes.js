@@ -1,21 +1,8 @@
-const express = require("express");
-const { 
-    applyJob, 
-    getAllApplications, 
-    getApplicationById, 
-    deleteApplication 
-} = require("../controllers/JobApplication");
-
+const express = require('express');
 const router = express.Router();
+const { postJob } = require('../controllers/jobController');
+const auth = require('../middleware/auth'); // adjust path
 
-// Route for applying for a job
-router.post("/applyJob", applyJob);
-router.get('/getAllApplications', getAllApplications);
-
-// Route to get a single job application by ID
-router.get("/application/:id", getApplicationById);
-
-// Route to delete a job application
-router.delete("/application/:id", deleteApplication);
+router.post('/jobs', auth, postJob);
 
 module.exports = router;

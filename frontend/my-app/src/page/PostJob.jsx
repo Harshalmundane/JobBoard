@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../components/Navbar";
 
@@ -15,6 +15,7 @@ const PostJob = () => {
         jobType: "Full-time",
         experience: "Mid-level"
     });
+    
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e) => {
@@ -28,20 +29,36 @@ const PostJob = () => {
     const handleOnSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-
-        // Check if any required field is empty
-        if (!formData.title || !formData.company || !formData.location || !formData.description) {
+    
+        if (!formData.title || !formData.company || !formData.location || !formData.description || !formData.salary) {
             toast.error("Please fill all required fields");
             setIsSubmitting(false);
             return;
         }
-
+    
         try {
-            const response = await axios.post("http://localhost:3001/api/jobs", formData);
-
+            const userId = localStorage.getItem("_id"); // ✅ User ID
+            const token = localStorage.getItem("token"); // ✅ Auth token
+    
+            const jobData = {
+                ...formData,
+                user_id: userId,
+                salary: Number(formData.salary)
+            };
+    
+            const response = await axios.post(
+                "http://localhost:3001/api/jobsPost/jobs",
+                jobData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+    
             if (response.status === 201) {
                 toast.success("Job posted successfully!");
-                // Reset form
                 setFormData({
                     title: "",
                     company: "",
@@ -59,20 +76,24 @@ const PostJob = () => {
             setIsSubmitting(false);
         }
     };
-
+    
+    
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <Navbar />
+
+            {/* ✅ Toast Container */}
+            <ToastContainer position="top-right" autoClose={3000} />
 
             <div className="max-w-4xl mx-auto px-4 py-12">
                 <div className="bg-white rounded-xl shadow-xl overflow-hidden">
                     {/* Form Header */}
                     <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6 text-white text-center">
-    <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold">Post a New Job Opportunity</h1>
-        <p className="mt-2 opacity-90">Fill out the form below to list your job opening</p>
-    </div>
-</div>
+                        <div className="max-w-3xl mx-auto">
+                            <h1 className="text-3xl font-bold">Post a New Job Opportunity</h1>
+                            <p className="mt-2 opacity-90">Fill out the form below to list your job opening</p>
+                        </div>
+                    </div>
                     {/* Job Form */}
                     <form onSubmit={handleOnSubmit} className="p-6 md:p-8 space-y-6">
                         <div className="grid md:grid-cols-2 gap-6">

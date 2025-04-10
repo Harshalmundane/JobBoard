@@ -4,7 +4,8 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const authRoutes = require("./route/authRoutes");
-const jobRoutes=require('./route/jobRoutes')
+const jobRoutes=require('./route/jobApplication');
+const jobPost=require('./route/jobRoutes')
 const connectDB = require("./database/db");
 const Userdb = require("./model/model");
 
@@ -27,9 +28,12 @@ app.use((req, res, next) => {
 // Enable CORS
 app.use(cors());
 
+app.use('/uploads', express.static('uploads'));
+
 // Authentication Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api/jobsPost",jobPost)
 
 // Home route
 app.get("/", (req, res) => {

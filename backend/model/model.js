@@ -1,5 +1,3 @@
-//model.js
-
 const mongoose = require('mongoose');
 
 const schema = new mongoose.Schema({
@@ -15,6 +13,11 @@ const schema = new mongoose.Schema({
     description: String,
     salary: {
         type: Number,
+        required: true
+    },
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // reference to the user model
         required: true
     }
 });
