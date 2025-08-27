@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
 
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
 
 const Jobs = () => {
@@ -11,25 +12,36 @@ const Jobs = () => {
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [categories, setCategories] = useState([]);
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        fetchJobs();
-    }, []);
-
-    const fetchJobs = async () => {
-        try {
-            const response = await axios.get("http://localhost:3001/api/jobs");
-            setJobs(response.data);
-            setFilteredJobs(response.data);
-
-            // Extract unique categories
-            const uniqueCategories = [...new Set(response.data.map(job => job.category || "General"))];
-            setCategories(["All", ...uniqueCategories]);
-        } catch (error) {
-            console.error("Error fetching jobs:", error);
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        if (storedUser) {
+            setUser(storedUser);
         }
-        setLoading(false);
-    };
+
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem("token");
+                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+                const jobsResponse = await axios.get("http://localhost:3001/api/jobs", { headers });
+                setJobs(jobsResponse.data);
+                setFilteredJobs(jobsResponse.data);
+
+                const uniqueCategories = [...new Set(jobsResponse.data.map(job => job.category || "General"))];
+                setCategories(["All", ...uniqueCategories]);
+            } catch (error) {
+                toast.error(error.response?.data?.error || "Failed to load jobs. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const handleSearch = (e) => {
         const value = e.target.value.toLowerCase();
@@ -44,25 +56,34 @@ const Jobs = () => {
 
     const filterJobs = (searchValue, category) => {
         const filtered = jobs.filter((job) => {
-            const matchesSearch = job.title.toLowerCase().includes(searchValue);
+            const matchesSearch =
+                (job.title || "").toLowerCase().includes(searchValue) ||
+                (job.company || "").toLowerCase().includes(searchValue) ||
+                (job.location || "").toLowerCase().includes(searchValue);
             const matchesCategory = category === "All" || job.category === category || (!job.category && category === "General");
             return matchesSearch && matchesCategory;
         });
         setFilteredJobs(filtered);
     };
 
+    const handleJobClick = (jobId, jobUserId) => {
+        if (user && user.role === "Job Poster" && user._id === jobUserId) {
+            navigate(`/post-job/${jobId}`); // Navigate to edit job
+        } else {
+            navigate(user ? `/apply-job/${jobId}` : "/login");
+            if (!user) {
+                toast.error("Please log in to apply for jobs");
+            }
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <Navbar />
-
-            {/* Hero Section */}
             <div className="bg-indigo-700 text-white py-16">
                 <div className="container mx-auto px-6 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold mb-6">Find Your Next Opportunity</h1>
                     <p className="text-xl md:text-2xl mb-8">Browse through our curated list of exciting career opportunities</p>
-
-                    {/* Search Bar */}
-                    {/* Search Bar - Updated Version */}
                     <div className="max-w-3xl mx-auto">
                         <div className="relative">
                             <input
@@ -90,24 +111,22 @@ const Jobs = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Category Filters */}
             <div className="container mx-auto px-6 py-8">
                 <div className="flex flex-wrap gap-3 justify-center mb-8">
                     {categories.map((category) => (
                         <button
                             key={category}
                             onClick={() => handleCategoryFilter(category)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === category
-                                ? 'bg-indigo-600 text-white shadow-md'
-                                : 'bg-white text-gray-700 hover:bg-gray-100 shadow-sm'}`}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                                selectedCategory === category
+                                    ? "bg-indigo-600 text-white shadow-md"
+                                    : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
+                            }`}
                         >
                             {category}
                         </button>
                     ))}
                 </div>
-
-                {/* Job Listings */}
                 <div className="mb-12">
                     {loading ? (
                         <div className="flex justify-center items-center h-64">
@@ -115,8 +134,19 @@ const Jobs = () => {
                         </div>
                     ) : filteredJobs.length === 0 ? (
                         <div className="text-center py-16">
-                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg
+                                className="mx-auto h-12 w-12 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
                             </svg>
                             <h3 className="mt-4 text-lg font-medium text-gray-900">No jobs found</h3>
                             <p className="mt-1 text-gray-600">Try adjusting your search or filter criteria</p>
@@ -124,40 +154,52 @@ const Jobs = () => {
                     ) : (
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredJobs.map((job) => (
-                                <div key={job._id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                <div
+                                    key={job._id}
+                                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                                    onClick={() => handleJobClick(job._id, job.user_id?._id || job.user_id)}
+                                >
                                     <div className="p-6">
                                         <div className="flex items-start justify-between">
                                             <div className="w-full">
                                                 <div className="flex items-center gap-3 mb-1">
-                                                {job.user_id?.logo && (
-                        <img
-                            className="h-6 w-6 rounded-full object-contain border border-gray-300 bg-white p-1"
-                            src={`http://localhost:3001/uploads/${job.user_id.logo}`}
-                            alt="Logo"
-                        />
-                    )}
-                                                    <p className="text-indigo-600 font-semibold text-base">{job.company}</p>
+                                                    {job.user_id?.logo && (
+                                                        <img
+                                                            className="h-6 w-6 rounded-full object-contain border border-gray-300 bg-white p-1"
+                                                            src={`http://localhost:3001/uploads/${job.user_id.logo}`}
+                                                            alt="Logo"
+                                                        />
+                                                    )}
+                                                    <p className="text-indigo-600 font-semibold text-base">{job.company || "N/A"}</p>
                                                 </div>
-                                                <h2 className="text-lg font-bold text-gray-900 mb-1">{job.title}</h2>
-                                                <p className="text-gray-500 text-sm line-clamp-3 mb-3">{job.description}</p>
-
+                                                <h2 className="text-lg font-bold text-gray-900 mb-1">{job.title || "N/A"}</h2>
+                                                <p className="text-gray-500 text-sm line-clamp-3 mb-3">{job.description || "No description available"}</p>
                                                 <div className="flex items-center text-sm text-gray-500 mb-2">
                                                     <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                                        />
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     </svg>
-                                                    {job.location}
+                                                    {job.location || "N/A"}
                                                 </div>
-
                                                 <p className="text-gray-700 font-medium mb-3">
-                                                    <span className="text-indigo-600">Salary:</span> ₹{job.salary}
+                                                    <span className="text-indigo-600">Salary:</span> ₹{job.salary || "Not specified"}
                                                 </p>
-
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-sm px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full">{job.category || "General"}</span>
+                                                    <span className="text-sm px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full">
+                                                        {job.category || "General"}
+                                                    </span>
                                                     <Link
-                                                        to={`/apply-job/${job._id}`}
-                                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm transition-all"
+                                                        to={user ? `/apply-job/${job._id}` : "/login"}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (!user) toast.error("Please log in to apply for jobs");
+                                                        }}
+                                                        className="px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-all"
                                                     >
                                                         Apply Now
                                                     </Link>
@@ -166,14 +208,11 @@ const Jobs = () => {
                                         </div>
                                     </div>
                                 </div>
-
                             ))}
                         </div>
                     )}
                 </div>
             </div>
-
-            {/* Call to Action */}
             <div className="bg-indigo-50 py-12">
                 <div className="container mx-auto px-6 text-center">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Can't find what you're looking for?</h2>
